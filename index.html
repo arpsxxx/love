@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How well Sangu knows Arpit(pustey)?</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #ffd6e7, #ffe9f3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .quiz-box {
+      background: white;
+      width: 90%;
+      max-width: 500px;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+
+    h1 {
+      color: #ff4f81;
+      margin-bottom: 10px;
+    }
+
+    #startScreen h1 {
+      font-size: 32px;
+      line-height: 1.4;
+      margin-bottom: 30px;
+    }
+
+    #question {
+      font-size: 20px;
+      margin: 20px 0;
+      color: #333;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: #ff85a2;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .option-btn:hover {
+      background: #ff5f8a;
+    }
+
+    #nextBtn {
+      margin-top: 20px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 12px;
+      background: #ff4f81;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      display: none;
+    }
+
+    #result {
+      font-size: 22px;
+      color: #444;
+      margin-top: 20px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-box">
+
+    <!-- Start Screen -->
+    <div id="startScreen">
+      <h1>Suna na aja euta quiz game khelum hai?</h1>
+      <button class="option-btn" onclick="startQuiz()">Start 💖</button>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div id="quiz" class="hidden">
+      <h1>Timle malai kattiko chineko xau ta?</h1>
+      <div id="question">La aba suru garum laa?</div>
+      <div id="answers"></div>
+      <button id="nextBtn">Next</button>
+    </div>
+
+    <!-- Result Screen -->
+    <div id="result" class="hidden"></div>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        question: "Where did we first meet?",
+        options: ["Lidl RDC", "Bus 180", "Whatsapp", "Family gathering"],
+        answer: 1
+      },
+      {
+        question: "What is my favorite food?",
+        options: ["Momo", "Chicken wings", "White chocolate", "Sangu ko chuppa"],
+        answer: 1
+      },
+      {
+        question: "Mero kati jana ex thiyo?",
+        options: ["0", "1", "2", "-1"],
+        answer: 1
+      },
+      {
+        question: "Mero favourite drink k ho?",
+        options: ["Coke", "Mango juice", "Water", "Sangu ko haat ko juice"],
+        answer: 1
+      },
+      {
+        question: "Mero favourite club kun ho?",
+        options: ["Barcelone", "Real Madrid", "Chelsea", "Manchester United"],
+        answer: 1
+      },
+      {
+        question: "Hami first date kata gako thiyem?",
+        options: ["Central London", "Devis Corner", "Greenwich Park", "Lidl Belvedere"],
+        answer: 2
+      },
+      {
+        question: "Mero sabai bhanda favourite job k ho?",
+        options: ["Khana khane", "Mobile chalaune", "Sangu lai sataune", "Ghumera paisa sakne"],
+        answer: 3
+      },
+      {
+        question: "Ma kati baje janmeko thiye?",
+        options: ["2:24 AM", "2:23 PM", "2:24PM", "2:23 AM"],
+        answer: 2
+      },
+      {
+        question: "Mero favourite color k ho?",
+        options: ["Yellow", "Red", "White", "Sangu ko lipstick ko colour"],
+        answer: 0
+      },
+      {
+        question: "Ma kati baje sutta jane thiyem?",
+        options: ["10 PM", "11 PM", "12 AM", "1 AM"],
+        answer: 2
+      },
+      {
+        question: "Mero favourite Nepali actress ko ho?",
+        options: ["Priyanka Karki", "Pooja Sharma", "Sangita Baniya", "Samragyee RL Shah"],
+        answer: 3
+      },
+      {
+        question: "Malai sabbai bhanda mannparne masu kun ho?",
+        options: ["Chicken", "Buff", "Mutton", "J sukai hos fal masu"],
+        answer: 3
+      },
+      {
+        question: "Mero favourite Nepali singer ko ho?",
+        options: ["Sushant KC", "Sajjan Raj Vaidya", "Yabesh Thapa", "Sangita Baniya"],
+        answer: 1
+      },
+      {
+        question: "Nepal ma paine sabai bhanda mannparne mero khanekura kun ho?",
+        options: ["Panipuri", "Momo", "Chatpate", "Mamu ko haat ko khana"],
+        answer: 1
+      },
+      {
+        question: "Mero favourite raksi kun ho?",
+        options: ["JD", "Jameson", "Black Label", "Maile raksi khana xodisake"],
+        answer: 0
+      },
+      {
+        question: "Mero favourite Nepali actor ko ho?",
+        options: ["Dayahang Rai", "Saugat Malla", "Sushant KC", "Sangita Baniya"],
+        answer: 3
+      },
+      {
+        question: "Mero dream destination place kata ho?",
+        options: ["Madrid", "Edinburgh", "Santorini", "Sangita ko ghar(Mero sasurali)"],
+        answer: 2
+      }
+    ];
+
+    const questionEl = document.getElementById("question");
+    const answersEl = document.getElementById("answers");
+    const nextBtn = document.getElementById("nextBtn");
+    const resultEl = document.getElementById("result");
+
+    let currentQuestion = 0;
+    let score = 0;
+    let selectedAnswer = null;
+
+    function startQuiz() {
+      document.getElementById("startScreen").classList.add("hidden");
+      document.getElementById("quiz").classList.remove("hidden");
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      selectedAnswer = null;
+      nextBtn.style.display = "none";
+      const currentQuiz = quizData[currentQuestion];
+      questionEl.textContent = currentQuiz.question;
+      answersEl.innerHTML = "";
+
+      currentQuiz.options.forEach((option, index) => {
+        const button = document.createElement("button");
+        button.textContent = option;
+        button.classList.add("option-btn");
+        button.addEventListener("click", () => selectAnswer(index, button));
+        answersEl.appendChild(button);
+      });
+    }
+
+    function selectAnswer(index, button) {
+      selectedAnswer = index;
+      const buttons = document.querySelectorAll(".option-btn");
+      buttons.forEach(btn => btn.style.background = "#ff85a2");
+      button.style.background = "#ff4f81";
+      nextBtn.style.display = "inline-block";
+    }
+
+    nextBtn.addEventListener("click", () => {
+      if (selectedAnswer === quizData[currentQuestion].answer) {
+        score++;
+      }
+
+      currentQuestion++;
+
+      if (currentQuestion < quizData.length) {
+        loadQuestion();
+      } else {
+        showResult();
+      }
+    });
+
+    function showResult() {
+      document.getElementById("quiz").classList.add("hidden");
+      resultEl.classList.remove("hidden");
+
+     let message = "";
+
+if (score >= 0 && score <= 5) {
+  message = "😤 Xya timle ta malai ramrari chinekai rainxau";
+} 
+else if (score >= 6 && score <= 10) {
+  message = "😒 Jabo teti ni thaxaina hai mero barema?";
+} 
+else if (score >= 11 && score <= 13) {
+  message = "🙂 Thikai xa kaile kai birsinxa";
+} 
+else if (score >= 14) {
+  message = "😘 Chuppa timlai";
+}
+
+      resultEl.innerHTML = `You scored <strong>${score}/${quizData.length}</strong><br><br>${message}`;
+    }
+  </script>
+</body>
+</html>
