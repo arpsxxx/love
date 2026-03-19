@@ -13,16 +13,20 @@
       align-items: center;
       min-height: 100vh;
       margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
     }
 
     .quiz-box {
       background: white;
       width: 90%;
-      max-width: 500px;
+      max-width: 650px;
       padding: 25px;
       border-radius: 20px;
       box-shadow: 0 8px 25px rgba(0,0,0,0.15);
       text-align: center;
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
     h1 {
@@ -60,7 +64,12 @@
       background: #ff5f8a;
     }
 
-    #nextBtn {
+    .option-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.95;
+    }
+
+    #nextBtn, .restart-btn {
       margin-top: 20px;
       padding: 12px 20px;
       border: none;
@@ -69,6 +78,9 @@
       color: white;
       font-size: 16px;
       cursor: pointer;
+    }
+
+    #nextBtn {
       display: none;
     }
 
@@ -76,6 +88,31 @@
       font-size: 22px;
       color: #444;
       margin-top: 20px;
+    }
+
+    #feedback {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      min-height: 24px;
+    }
+
+    .correct {
+      color: green;
+    }
+
+    .wrong {
+      color: red;
+    }
+
+    .summary-box {
+      text-align: left;
+      margin-top: 15px;
+      padding: 12px;
+      background: #fff0f5;
+      border-radius: 10px;
+      font-size: 16px;
+      line-height: 1.6;
     }
 
     .hidden {
@@ -86,21 +123,19 @@
 <body>
   <div class="quiz-box">
 
-    <!-- Start Screen -->
     <div id="startScreen">
       <h1>Suna na aja euta quiz game khelum hai?</h1>
       <button class="option-btn" onclick="startQuiz()">Start 💖</button>
     </div>
 
-    <!-- Quiz Screen -->
     <div id="quiz" class="hidden">
       <h1>Timle malai kattiko chineko xau ta?</h1>
       <div id="question">La aba suru garum laa?</div>
       <div id="answers"></div>
+      <div id="feedback"></div>
       <button id="nextBtn">Next</button>
     </div>
 
-    <!-- Result Screen -->
     <div id="result" class="hidden"></div>
   </div>
 
@@ -197,10 +232,13 @@
     const answersEl = document.getElementById("answers");
     const nextBtn = document.getElementById("nextBtn");
     const resultEl = document.getElementById("result");
+    const feedbackEl = document.getElementById("feedback");
 
     let currentQuestion = 0;
     let score = 0;
     let selectedAnswer = null;
+    let wrongQuestions = [];
+    let answered = false;
 
     function startQuiz() {
       document.getElementById("startScreen").classList.add("hidden");
@@ -210,7 +248,11 @@
 
     function loadQuestion() {
       selectedAnswer = null;
+      answered = false;
       nextBtn.style.display = "none";
+      feedbackEl.textContent = "";
+      feedbackEl.className = "";
+
       const currentQuiz = quizData[currentQuestion];
       questionEl.textContent = currentQuiz.question;
       answersEl.innerHTML = "";
@@ -224,19 +266,44 @@
       });
     }
 
-    function selectAnswer(index, button) {
-      selectedAnswer = index;
-      const buttons = document.querySelectorAll(".option-btn");
-      buttons.forEach(btn => btn.style.background = "#ff85a2");
-      button.style.background = "#ff4f81";
-      nextBtn.style.display = "inline-block";
+function selectAnswer(index, button) {
+  if (answered) return;
+
+  answered = true;
+  selectedAnswer = index;
+
+  const buttons = answersEl.querySelectorAll(".option-btn");
+  const correctIndex = quizData[currentQuestion].answer;
+
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+
+    if (i === correctIndex) {
+      btn.style.background = "green";
+    } else {
+      btn.style.background = "#8B0000";
     }
+  });
+
+  if (index === correctIndex) {
+    score++;
+    feedbackEl.textContent = "✅Milyo Milyooooooo!";
+    feedbackEl.className = "correct";
+  } else {
+    feedbackEl.textContent = `❌ Oh no galat jawab diyeu! Right answer: ${quizData[currentQuestion].options[correctIndex]}`;
+    feedbackEl.className = "wrong";
+
+    wrongQuestions.push({
+      question: quizData[currentQuestion].question,
+      yourAnswer: quizData[currentQuestion].options[index],
+      correctAnswer: quizData[currentQuestion].options[correctIndex]
+    });
+  }
+
+  nextBtn.style.display = "inline-block";
+}
 
     nextBtn.addEventListener("click", () => {
-      if (selectedAnswer === quizData[currentQuestion].answer) {
-        score++;
-      }
-
       currentQuestion++;
 
       if (currentQuestion < quizData.length) {
@@ -250,22 +317,54 @@
       document.getElementById("quiz").classList.add("hidden");
       resultEl.classList.remove("hidden");
 
-     let message = "";
+      let message = "";
 
-if (score >= 0 && score <= 5) {
-  message = "😤 Xya timle ta malai ramrari chinekai rainxau";
-} 
-else if (score >= 6 && score <= 10) {
-  message = "😒 Jabo teti ni thaxaina hai mero barema?";
-} 
-else if (score >= 11 && score <= 13) {
-  message = "🙂 Thikai xa kaile kai birsinxa";
-} 
-else if (score >= 14) {
-  message = "😘 Chuppa timlai";
-}
+      if (score >= 0 && score <= 5) {
+        message = "Xya timle ta malai ramrari chinekai rainxau";
+      } else if (score >= 6 && score <= 10) {
+        message = "Jabo teti ni thaxaina hai mero barema?";
+      } else if (score >= 11 && score <= 13) {
+        message = "Thikai xa kaile kai birsinxa";
+      } else if (score >= 14) {
+        message = "Chuppa timlai";
+      }
 
-      resultEl.innerHTML = `You scored <strong>${score}/${quizData.length}</strong><br><br>${message}`;
+      let summaryHTML = `
+        <h1>Quiz Summary 💖</h1>
+        <p>Timile score gareu: <strong>${score}/${quizData.length}</strong></p>
+        <p>✅ Right answers: <strong>${score}</strong></p>
+        <p>❌ Wrong answers: <strong>${quizData.length - score}</strong></p>
+        <p><strong>${message}</strong></p>
+      `;
+
+      if (wrongQuestions.length > 0) {
+        summaryHTML += `<h2 style="color:#ff4f81; margin-top:25px;">Galat bhayeko questions</h2>`;
+        wrongQuestions.forEach((item) => {
+          summaryHTML += `
+            <div class="summary-box">
+              <strong>Q:</strong> ${item.question}<br>
+              <strong>Your answer:</strong> ${item.yourAnswer}<br>
+              <strong>Correct answer:</strong> ${item.correctAnswer}
+            </div>
+          `;
+        });
+      }
+
+      summaryHTML += `<button class="restart-btn" onclick="restartQuiz()">Play Again 💕</button>`;
+
+      resultEl.innerHTML = summaryHTML;
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      selectedAnswer = null;
+      wrongQuestions = [];
+      answered = false;
+
+      resultEl.classList.add("hidden");
+      document.getElementById("quiz").classList.remove("hidden");
+      loadQuestion();
     }
   </script>
 </body>
